@@ -52,5 +52,6 @@ module.exports.routes = {
     'DELETE /pickup/:pickupModelId/:boxId': 'Pickup.removeBoxFromPickup',
     
     'GET /box/:boxId': 'Box.getBoxById',
-    'GET /box/:boxId/pickup': 'Box.getPickupForBox'
+    'GET /box/:boxId/pickup': 'Box.getPickupForBox',
+    'DELETE /box/:boxId': 'Box.removeBoxById'
 };

@@ -7,7 +7,8 @@
 
 module.exports = {
 	getBoxById: _getBoxById,
-    getPickupForBox: _getPickupForBox
+    getPickupForBox: _getPickupForBox,
+    removeBoxById: _removeBoxById
 };
 
 function _getBoxById(req, res) {
@@ -28,3 +29,9 @@ function _getPickupForBox(req, res) {
     });
 }
 
+function _removeBoxById(req, res) {
+    
+    sails.models.box.destroy({boxId: req.params.boxId, pickupOrder: null}).then(function(result){
+        return res.json(result);
+    });
+}

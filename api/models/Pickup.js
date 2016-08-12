@@ -13,7 +13,7 @@ module.exports = {
       destinationLatitude : { type : 'float' },
       destinationLongitude : { type : 'float' },
       packageSize : { type : 'integer' },
-      pboxId : { type : 'string' },
+      pboxId : { type : 'array' },
       status : { type : 'string' },
       
       boxes : {

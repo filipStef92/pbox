@@ -46,9 +46,11 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-    'DELETE /pickup/:pickupModelId/:boxId': 'Pickup.removeBoxFromPickup',
+    'POST /pickup': 'Pickup.createPickup',
+    'PUT /pickup/:pickupModelId': 'Pickup.updateDestination',
     'PUT /pickup/:pickupModelId/:boxId': 'Pickup.addBoxToPickup',
+    'DELETE /pickup/:pickupModelId/:boxId': 'Pickup.removeBoxFromPickup',
+    
     'GET /box/:boxId': 'Box.getBoxById',
     'GET /box/:boxId/pickup': 'Box.getPickupForBox'
-    //'GET /testAPI?userName=:filterParameter': 'testAPI.getFilteredResult'
 };

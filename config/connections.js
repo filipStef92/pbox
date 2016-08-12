@@ -64,6 +64,14 @@ module.exports.connections = {
      password: 'admin', //optional
      database: 'pboxmongodb' //optional
    }
+//    mongoDB: {
+//        adapter: 'sails-mongo',
+//     host: 'localhost',
+//     port: 27017,
+//     //user: 'root', //optional
+//     //password: 'admin', //optional
+//     database: 'local' //optional
+//   }
 
   /***************************************************************************
   *                                                                          *

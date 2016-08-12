@@ -13,11 +13,7 @@ module.exports = {
 function _getBoxById(req, res) {
     
     sails.models.box.findOne({boxId: req.params.boxId}).then(function(result){
-        if (result) {
-            return res.json(result);
-        } else {
-            return res.send('No Box with ID ' + req.params.boxId + ' found');
-        }
+        return res.json(result);
     });
 }
 
@@ -27,7 +23,7 @@ function _getPickupForBox(req, res) {
         if (result.pickupOrder) {
             return res.json(result.pickupOrder);
         } else {
-            return res.send('No Pickup attached to Box with Id ' + req.params.boxId);
+            return res.json();
         }
     });
 }

@@ -20,6 +20,11 @@
 #define HUMID_AND_TEMP  2
 #define LIGHTSNSR       A0
 
+/*
+ * ACCEL_MODE stands for ACCELEROMETER MODE. 0 = raw acceleration data, 1 = color
+ */
+#define ACCEL_MODE      1
+
 gpsSentenceInfoStruct info;
 LWiFiClient wifiClient;
 Grove_LED_Bar led_bar(9, 8, false);
@@ -52,7 +57,8 @@ void setup() {
 }
 
 void loop(){
-  
+
+  PBox_500ms();
   PBox_1sec();
   PBox_5sec();
 }
@@ -96,8 +102,25 @@ void callback(char* topic, byte* payload, unsigned int length)
 }
 
 /*
- * 1sec and 5sec functions
+ * Recurring functions
  */
+
+void PBox_500ms() {
+
+  static unsigned long currentTime = 0;
+  static unsigned long time = 0;
+  
+  currentTime = millis();
+
+  if (currentTime > (time + 500)) {
+
+    PBox__Accelerometer();
+      
+    time = currentTime;
+    Device.Process();
+  }
+  
+}
 
 void PBox_1sec() {
 
@@ -110,7 +133,6 @@ void PBox_1sec() {
   if (currentTime > (time + 1000)) {
 
     PBox__LightSnsr();
-    PBox__Accelerometer();
       
     time = currentTime;
     Device.Process();
@@ -196,8 +218,20 @@ void PBox__Accelerometer() {
   static double prevAccelerometerAcceleration[3] = {DBL_MAX, DBL_MAX, DBL_MAX};
   static bool sendAccel = false;
 
+#if (ACCEL_MODE == 1)
+  int x,y,z;
+#endif
+
   if (sendFlag) {
+    #if (ACCEL_MODE == 0)
     accelerometer.getAcceleration(accelerometerAcceleration);
+    #endif
+    #if (ACCEL_MODE == 1)
+    accelerometer.readXYZ(&x, &y, &z);
+    accelerometerAcceleration[0] = x % 255;
+    accelerometerAcceleration[1] = y % 255;
+    accelerometerAcceleration[2] = z % 255;
+    #endif
   } else {
     accelerometerAcceleration[0] = 0.0;
     accelerometerAcceleration[1] = 0.0;
@@ -218,11 +252,14 @@ void PBox__Accelerometer() {
   }
   if (sendAccel) {
     char* accelStr = new char[30];
-    sprintf(accelStr, "X=%4.2f g, Y=%4.2f g, Z=%4.2f g\0", prevAccelerometerAcceleration[0], prevAccelerometerAcceleration[1], prevAccelerometerAcceleration[2]);
+    sprintf(accelStr, "{\"r\":%d,\"g\":%d,\"b\":%d}\0", (int)prevAccelerometerAcceleration[0], (int)prevAccelerometerAcceleration[1], (int)prevAccelerometerAcceleration[2]);
+    //sprintf(accelStr, "X:%4.2f,Y:%4.2f,Z:%4.2f\0", prevAccelerometerAcceleration[0], prevAccelerometerAcceleration[1], prevAccelerometerAcceleration[2]);
+    Device.Send(String(accelStr), 80);
     Device.Send(String(accelStr), 30);
     delete accelStr;
     sendAccel = false;
   }
+  
 
 }
 

@@ -17,6 +17,33 @@ function _removeBoxFromPickup(req, res) {
     
     var pickupIdFromReq = req.params.pickupModelId;
     var boxIdFromReq = req.params.boxId;
+    
+    sails.models.box.update({boxId: boxIdFromReq, pickupOrder: pickupIdFromReq}, {pickupOrder: null}).then(function(result){
+        sails.models.pickup.findOne({id: pickupIdFromReq}).then(function(findResult){
+            var pboxesIds = findResult.pboxId;
+            var localStatus = "READY";
+            for (let pboxIt of pboxesIds) {
+                if (pboxIt == boxIdFromReq) {
+                    pboxesIds.splice(pboxesIds.indexOf(pboxIt), 1);
+                    localStatus = "READY";
+                    if (pboxesIds.length == 0) {
+                        pboxesIds.push("NONE");
+                        localStatus = "DRAFT";
+                    }
+                }
+            }
+            
+            sails.models.pickup.update({id: pickupIdFromReq}, {pboxId: pboxesIds, status: localStatus}).then(function(updated){
+                return res.json(updated);
+            });
+        });
+    });
+}
+
+function _removeBoxFromPickup_v1(req, res) {
+    
+    var pickupIdFromReq = req.params.pickupModelId;
+    var boxIdFromReq = req.params.boxId;
 
     sails.models.pickup.findOne({id: pickupIdFromReq}).then(function(findResult){
         var pboxUpdatedIds = findResult.pboxId;
@@ -30,10 +57,8 @@ function _removeBoxFromPickup(req, res) {
             sails.models.box.update({boxId: boxIdFromReq}, {pickupOrder: null}).then(function(updated){
                 var localStatus = "READY";
                 if (pboxUpdatedIds.length == 1) {
-                    if (pboxUpdatedIds[0] == boxIdFromReq) {
-                        pboxUpdatedIds[0] = "NONE";
-                        localStatus = "DRAFT";    
-                    }
+                    pboxUpdatedIds[0] = "NONE";
+                    localStatus = "DRAFT";    
                 } else {
                     if (pboxUpdatedIds[pboxUpdatedIds.length-1] == boxIdFromReq) {
                         pboxUpdatedIds.pop();

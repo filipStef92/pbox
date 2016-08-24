@@ -51,6 +51,7 @@ module.exports.routes = {
     'PUT /pickup/:pickupModelId': 'Pickup.updateDestination',
     'PUT /pickup/:pickupModelId/:boxId': 'Pickup.addBoxToPickup',
     'DELETE /pickup/:pickupModelId/:boxId': 'Pickup.removeBoxFromPickup',
+    'DELETE /pickup/:pickupModelId': 'Pickup.removePickup',
     
     'GET /box/:boxId': 'Box.getBoxById',
     'GET /box/:boxId/pickup': 'Box.getPickupForBox',

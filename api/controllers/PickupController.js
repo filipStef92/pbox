@@ -12,6 +12,7 @@ module.exports = {
     updateDestination: _updateDestination,
     addBoxToPickup: _addBoxToPickup,
     removeBoxFromPickup: _removeBoxFromPickup,
+    removePickup: _removePickup
 };
 
 function _removeBoxFromPickup(req, res) {
@@ -52,6 +53,20 @@ function _removeBoxFromPickup(req, res) {
             res.serverError('Invalid opperation. Cannot remove Box from an IN PROGRESS Pickup');
         }
     });
+}
+
+function _removePickup(req, res) {
+    
+    sails.models.pickup.findOne({id: req.params.pickupModelId}).then(function(findResult) {
+        if (findResult.status == "IDLE" || findResult.status == "DRAFT" || findResult.status == "DELIVERED" ) {
+            sails.models.pickup.destroy({id: req.params.pickupModelId}).then(function(result) {
+                return res.json(result);
+            });
+        } else {
+            return res.send('Cannot delete Pickup');
+        }
+    });
+        
 }
 
 function _removeBoxFromPickup_v1(req, res) {

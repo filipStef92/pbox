@@ -1,5 +1,5 @@
 {
-  "name": "pbox_sails",
+  "name": "pbox",
   "private": true,
   "version": "0.0.0",
   "description": "a Sails application",
@@ -32,8 +32,8 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/dani/pbox_sails.git"
+    "url": "git://github.com/cdbhnd/pbox.git"
   },
-  "author": "dani",
+  "author": "cdbhnd",
   "license": ""
 }

@@ -17,8 +17,10 @@
 #define LS_PEAK_VALUE   540
 #define THRESHOLD       (2)
 #define VIBRATOR        6
-#define HUMID_AND_TEMP  2
+#define HUMID_AND_TEMP  4
 #define LIGHTSNSR       A0
+#define BTN_PIN         3
+#define ACCEL_THRESHOLD 10
 
 /*
  * ACCEL_MODE stands for ACCELEROMETER MODE. 0 = raw acceleration data, 1 = color
@@ -39,6 +41,7 @@ byte mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x01};  //Adapt to your Arduino MAC 
 double latitude;
 double longitude;
 bool sendFlag = 0;
+volatile bool changeSendFlag = 0;
 
 //required for the device connection
 void callback(char* topic, byte* payload, unsigned int length);
@@ -133,6 +136,7 @@ void PBox_1sec() {
   if (currentTime > (time + 1000)) {
 
     PBox__LightSnsr();
+    PBox__UpdateSendFlag();
       
     time = currentTime;
     Device.Process();
@@ -238,18 +242,38 @@ void PBox__Accelerometer() {
     accelerometerAcceleration[2] = 0.0;  
   }
 
-  if (accelerometerAcceleration[0] != prevAccelerometerAcceleration[0]) {
+  double difference = 0;
+
+  if (accelerometerAcceleration[0] >= prevAccelerometerAcceleration[0]) {
+    difference = accelerometerAcceleration[0] - prevAccelerometerAcceleration[0];
+  } else {
+    difference = prevAccelerometerAcceleration[0] - accelerometerAcceleration[0];
+  }
+  if (difference > ACCEL_THRESHOLD) {
     prevAccelerometerAcceleration[0] = accelerometerAcceleration[0];
     sendAccel = true;
   }
-  if (accelerometerAcceleration[1] != prevAccelerometerAcceleration[1]) {
+
+  if (accelerometerAcceleration[1] >= prevAccelerometerAcceleration[1]) {
+    difference = accelerometerAcceleration[1] - prevAccelerometerAcceleration[1];
+  } else {
+    difference = prevAccelerometerAcceleration[1] - accelerometerAcceleration[1];
+  }
+  if (difference > ACCEL_THRESHOLD) {
     prevAccelerometerAcceleration[1] = accelerometerAcceleration[1];
     sendAccel = true;
   }
-  if (accelerometerAcceleration[2] != prevAccelerometerAcceleration[2]) {
+
+  if (accelerometerAcceleration[2] >= prevAccelerometerAcceleration[2]) {
+    difference = accelerometerAcceleration[2] - prevAccelerometerAcceleration[2];
+  } else {
+    difference = prevAccelerometerAcceleration[2] - accelerometerAcceleration[2];
+  }
+  if (difference > ACCEL_THRESHOLD) {
     prevAccelerometerAcceleration[2] = accelerometerAcceleration[2];
     sendAccel = true;
   }
+
   if (sendAccel) {
     char* accelStr = new char[30];
     sprintf(accelStr, "{\"r\":%d,\"g\":%d,\"b\":%d}\0", (int)prevAccelerometerAcceleration[0], (int)prevAccelerometerAcceleration[1], (int)prevAccelerometerAcceleration[2]);
@@ -276,20 +300,37 @@ void PBox__GPS() {
   }
 }
 
+void PBox__UpdateSendFlag() {
+
+  if (changeSendFlag) {
+    sendFlag = !sendFlag;
+    Device.Send(String(sendFlag), 100);
+    changeSendFlag = 0;
+  }
+}
+
+void btnInterrupt() {
+  changeSendFlag = 1;
+}
+
 /*
  * Init functions
  */
+
 
 void initAndPowerOn() {
   
   Serial.begin(9600);  // init serial link for debugging
   pinMode(VIBRATOR, OUTPUT);
+  pinMode(BTN_PIN, INPUT);
+  attachInterrupt(1, btnInterrupt, CHANGE);
   digitalWrite(VIBRATOR, LOW);
   led_bar.begin();
   LGPS.powerOn();
   dht.begin();
   accelerometer.powerOn();
 }
+
 
 void connectToHttpAndMqtt() {
   

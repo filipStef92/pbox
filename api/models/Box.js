@@ -9,13 +9,13 @@ module.exports = {
 
   attributes: {
       boxId : { type : 'string' },
-      boxLatitude : { type : 'float' },
-      boxLongitude : { type : 'float' },
-      isSendingInfo : { type : 'boolean' },
-      temperature : { type : 'float' },
-      humidity : { type : 'float' },
-      light : { type : 'integer' },
-      accelerometer : { type : 'string' },
+      buttonAssetId : { type : 'string' },
+      gpsAssetId : { type : 'string' },
+      temperatureAssetId : { type : 'string' },
+      humidityAssetId : { type : 'string' },
+      lightAssetId : { type : 'string' },
+      accelerometerAssetId : { type : 'string' },
+      isBeingDelivered : { type : 'boolean' },
       
       pickupOrder : {
           model : 'pickup'

@@ -21,11 +21,12 @@
 #define LIGHTSNSR       A0
 #define BTN_PIN         3
 #define ACCEL_THRESHOLD 10
+#define GPS_THRESHOLD   0.000200
 
 /*
  * ACCEL_MODE stands for ACCELEROMETER MODE. 0 = raw acceleration data, 1 = color
  */
-#define ACCEL_MODE      1
+#define ACCEL_MODE      0
 
 gpsSentenceInfoStruct info;
 LWiFiClient wifiClient;
@@ -39,7 +40,9 @@ char clientKey[] = "tcndvrfznop";
 byte mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x01};  //Adapt to your Arduino MAC address if needed
 
 double latitude;
+double oldLatitude;
 double longitude;
+double oldLongitude;
 bool sendFlag = 0;
 volatile bool changeSendFlag = 0;
 
@@ -117,7 +120,7 @@ void PBox_500ms() {
 
   if (currentTime > (time + 500)) {
 
-    PBox__Accelerometer();
+    //PBox__Accelerometer();
       
     time = currentTime;
     Device.Process();
@@ -136,6 +139,7 @@ void PBox_1sec() {
   if (currentTime > (time + 1000)) {
 
     PBox__LightSnsr();
+    PBox__Accelerometer();
     PBox__UpdateSendFlag();
       
     time = currentTime;
@@ -276,10 +280,14 @@ void PBox__Accelerometer() {
 
   if (sendAccel) {
     char* accelStr = new char[30];
+#if (ACCEL_MODE == 1)
     sprintf(accelStr, "{\"r\":%d,\"g\":%d,\"b\":%d}\0", (int)prevAccelerometerAcceleration[0], (int)prevAccelerometerAcceleration[1], (int)prevAccelerometerAcceleration[2]);
-    //sprintf(accelStr, "X:%4.2f,Y:%4.2f,Z:%4.2f\0", prevAccelerometerAcceleration[0], prevAccelerometerAcceleration[1], prevAccelerometerAcceleration[2]);
     Device.Send(String(accelStr), 80);
+#endif
+#if (ACCEL_MODE == 0)
+    sprintf(accelStr, "X:%4.2f, Y:%4.2f, Z:%4.2f\0", prevAccelerometerAcceleration[0], prevAccelerometerAcceleration[1], prevAccelerometerAcceleration[2]);
     Device.Send(String(accelStr), 30);
+#endif
     delete accelStr;
     sendAccel = false;
   }
@@ -292,11 +300,30 @@ void PBox__GPS() {
   if (sendFlag) {
     LGPS.getData(&info);
     parseGPGGA((const char*)info.GPGGA);
+
+    double latDiff = 0.0;
+    double lngDiff = 0.0;
     
-    char* gpsJson = new char[40];
-    sprintf(gpsJson, "{\"latitude\":%8.6f,\"longitude\":%8.6f}\0",latitude, longitude);
-    Device.Send(String(gpsJson), 99);
-    delete gpsJson;
+    if (oldLatitude >= latitude) {
+      latDiff = oldLatitude - latitude;
+    } else {
+      latDiff = latitude - oldLatitude;
+    }
+
+    if (oldLongitude >= longitude) {
+      lngDiff = oldLongitude - longitude;
+    } else {
+      lngDiff = longitude - oldLongitude;
+    }
+
+    if (latDiff >= GPS_THRESHOLD && lngDiff >= GPS_THRESHOLD) {
+      char* gpsJson = new char[40];
+      sprintf(gpsJson, "{\"latitude\":%4.10f,\"longitude\":%4.10f}\0",latitude, longitude);
+      Device.Send(String(gpsJson), 99);
+      delete gpsJson;
+      oldLatitude = latitude;
+      oldLongitude = longitude;
+    }
   }
 }
 

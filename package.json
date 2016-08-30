@@ -27,7 +27,11 @@
   },
   "scripts": {
     "debug": "node debug app.js",
-    "start": "node app.js"
+    "start": "sails lift"
+  },
+  "engines": {
+    "node": "6.1.0",
+    "npm": "3.10.5"
   },
   "main": "app.js",
   "repository": {

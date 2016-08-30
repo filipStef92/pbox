@@ -10,7 +10,8 @@ module.exports = {
     getBoxById: _getBoxById,
     getPickupForBox: _getPickupForBox,
     removeBoxById: _removeBoxById,
-    boxButtonPressed: _boxButtonPressed
+    resumePickupDelivery: _resumePickupDelivery,
+    pausePickupDelivery: _pausePickupDelivery
 };
 
 function _createBox(req, res) {
@@ -33,7 +34,11 @@ function _createBox(req, res) {
 function _getBoxById(req, res) {
     
     sails.models.box.findOne({boxId: req.params.boxId}).then(function(result){
-        return res.json(result);
+        if (result) {
+            return res.json(result);
+        } else {
+            return res.send('No Box with ID ' + req.params.boxId + ' found');
+        }
     });
 }
 
@@ -43,41 +48,46 @@ function _getPickupForBox(req, res) {
         if (result.pickupOrder) {
             return res.json(result.pickupOrder);
         } else {
-            return res.json();
+            return res.send('No Pickup attached to Box ' + req.params.boxId);
         }
     });
 }
 
 function _removeBoxById(req, res) {
     
-    sails.models.box.destroy({boxId: req.params.boxId, pickupOrder: null}).then(function(result){
-        return res.json(result);
+    sails.models.box.destroy({boxId: req.params.boxId, pickupOrder: null}).then(function(results){
+        if (results.length > 0) {
+            return res.json(results);
+        } else {
+            return res.send('Cannot delete Box ' + req.params.boxId);
+        }
     });
 }
 
-function _boxButtonPressed(boxIdParam) {
-        
-    sails.models.box.findOne({boxId: boxIdParam}).then(function(result){
-        sails.models.pickup.findOne({id: result.pickupOrder}).then(function(findResult){
-            if (findResult) {
-                //this IF is necessary in case there is no Box attached to any Pickup and the button is pressed on the box
-                var localStatus = "";
-                if (findResult.status == "IN PROGRESS") {
-                    localStatus = "PAUSED";
-                } else if ( (findResult.status == "READY") || (findResult.status == "PAUSED") ) {
-                    localStatus = "IN PROGRESS";
-                }
+function _resumePickupDelivery(boxIdParam) {
+    sails.models.box.findOne({boxId: boxIdParam}).populate('pickupOrder').then(function(result){
+        if (result) {
+            sails.models.box.update({boxId: boxIdParam}, {isBeingDelivered: true}).then(function(updated) {
+                //box updated to isBeingDelivered == true
+            });
+            sails.models.pickup.update({id: result.pickupOrder.id}, {status: "IN PROGRESS"}).then(function(updated) {
+                //'Pickup updated to IN PROGRESS
+                console.log('Resume Pickup Delivery ' + result.pickupOrder.id);
+            });
+        }
+    });
+}
 
-                if (result.isBeingDelivered == false) {
-                    sails.models.box.update({boxId: boxIdParam}, {isBeingDelivered: true}).then(function(updated){
-                        //do nothing for now
-                    });
-                }
-
-                sails.models.pickup.update({id: result.pickupOrder}, {status: localStatus}).then(function(updatedResult){
-                    console.log(updatedResult);
-                });
-            }
-        });
+function _pausePickupDelivery(boxIdParam) {
+    sails.models.box.findOne({boxId: boxIdParam}).populate('pickupOrder').then(function(result){
+        if (result) {
+            sails.models.box.update({boxId: boxIdParam}, {isBeingDelivered: false}).then(function(updated) {
+                //box updated to isBeingDelivered == false
+            });
+            sails.models.pickup.update({id: result.pickupOrder.id}, {status: "PAUSED"}).then(function(updated) {
+                //Pickup updated to PAUSED
+                console.log('Pause Pickup Delivery ' + result.pickupOrder.id);
+            });
+        }
     });
 }

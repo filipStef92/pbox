@@ -20,38 +20,40 @@ function _removeBoxFromPickup(req, res) {
     var pickupIdFromReq = req.params.pickupModelId;
     var boxIdFromReq = req.params.boxId;
     
-    sails.models.pickup.findOne({id: pickupIdFromReq}).then(function(findResult){
-        if (findResult.status != "IN PROGRESS") {
-            var pboxesIds = findResult.pboxId;
-            var localStatus = "";
-            for (let pboxIt of pboxesIds) {
-                if (pboxIt == boxIdFromReq) {
-                    pboxesIds.splice(pboxesIds.indexOf(pboxIt), 1);
-
-                    if (findResult.status == "READY") {
-                        localStatus = "READY";
-                        if (pboxesIds.length == 0) {
-                            pboxesIds.push("NONE");
-                            localStatus = "DRAFT";
-                        }
-                    }
-                    if (findResult.status == "PAUSED") {
-                        //should also take into account the location of the box before marking the Pickup as DELIVERED
-                        localStatus = "DELIVERED";
-                    }
-                }
-            }
-                
-                sails.models.box.update({boxId: boxIdFromReq, pickupOrder: pickupIdFromReq}, {pickupOrder: null, isBeingDelivered: false}).then(function(updatedBox){
-                    sails.models.pickup.update({id: pickupIdFromReq}, {pboxId: pboxesIds, status: localStatus}).then(function(updated){
-                        return res.json(updated);
-                    });
-                });
-
-                    
+    sails.models.pickup.findOne({id: pickupIdFromReq}).populate('boxes').then(function(findResult){
+        if (findResult.status == "IN PROGRESS") {
+            return res.send('Cannot delete Box from an IN PROGRESS Pickup');
         } else {
-            res.serverError('Invalid opperation. Cannot remove Box from an IN PROGRESS Pickup');
-        }
+            var localStatus = "";
+            if (findResult.status == "READY") {
+                if (findResult.boxes.length > 1) {
+                    localStatus = "READY";
+                } else {
+                    localStatus = "DRAFT";
+                }
+            } else if (findResult.status == "PAUSED") {
+                //should also take into account current Box position before updating to DELIVERED
+                //FIX IT!
+                localStatus = "DELIVERED";
+            }
+
+            sails.models.box.update({boxId: boxIdFromReq}, {pickupOrder: null}).then(function(updatedBox) {
+                sails.models.pickup.update({id: pickupIdFromReq}, {status: localStatus}).then(function(updatedPickup) {
+                    console.log('Pickup ' + pickupIdFromReq + ' removed from Box ' + boxIdFromReq);
+                    findResult.status = localStatus;
+                    var tempBoxes = findResult.boxes;
+                    tempBoxes.find(function(element) {
+                        if (element) {
+                            if (element.boxId == boxIdFromReq) {
+                                tempBoxes.splice(tempBoxes.indexOf(element), 1);
+                            }
+                        }
+                    });
+                    findResult.boxes = tempBoxes;
+                    return res.json(findResult);
+                });
+            });
+        }  
     });
 }
 
@@ -63,49 +65,10 @@ function _removePickup(req, res) {
                 return res.json(result);
             });
         } else {
-            return res.send('Cannot delete Pickup');
+            return res.send('Cannot delete Pickup ' + findResult.id + '. Status is ' + findResult.status);
         }
     });
         
-}
-
-function _removeBoxFromPickup_v1(req, res) {
-    
-    var pickupIdFromReq = req.params.pickupModelId;
-    var boxIdFromReq = req.params.boxId;
-
-    sails.models.pickup.findOne({id: pickupIdFromReq}).then(function(findResult){
-        var pboxUpdatedIds = findResult.pboxId;
-        var boxFoundInPickup = false;
-        for (let iterator of pboxUpdatedIds) {
-            if (iterator == boxIdFromReq) {
-                boxFoundInPickup = true;
-            }
-        }
-        if (boxFoundInPickup) {
-            sails.models.box.update({boxId: boxIdFromReq}, {pickupOrder: null}).then(function(updated){
-                var localStatus = "READY";
-                if (pboxUpdatedIds.length == 1) {
-                    pboxUpdatedIds[0] = "NONE";
-                    localStatus = "DRAFT";    
-                } else {
-                    if (pboxUpdatedIds[pboxUpdatedIds.length-1] == boxIdFromReq) {
-                        pboxUpdatedIds.pop();
-                    } else {
-                        pboxUpdatedIds.splice(pboxUpdatedIds.indexOf(boxIdFromReq), 1);    
-                    }
-                    localStatus = "READY";
-                }
-                sails.models.pickup.update({id: pickupIdFromReq},{pboxId: pboxUpdatedIds, status: localStatus}).then(function(result){
-                    //do nothing
-                });
-                return res.json(updated);
-            });
-        } else {
-            return res.json();
-        }
-            
-    });
 }
 
 function _createPickup(req, res) {
@@ -123,12 +86,11 @@ function _createPickup(req, res) {
             pickupLongitude: pckpLong,
             pickupAddress: pckAdd,
             packageSize: pckSize,
-            pboxId: ["NONE"],
             destinationLatitude: req.body.destinationLatitude,
             destinationLongitude: req.body.destinationLongitude,
             destinationAddress: destAdd,
             status: "DRAFT"
-        }).then(function(result){
+        }).populate('boxes').then(function(result){
             return res.json(result);
         });
     } else {
@@ -138,9 +100,8 @@ function _createPickup(req, res) {
             pickupLongitude: pckpLong,
             pickupAddress: pckAdd,
             packageSize: pckSize,
-            pboxId: ["NONE"],
             status: "IDLE"
-        }).then(function(result){
+        }).populate('boxes').then(function(result){
             return res.json(result);
         });
     }   
@@ -159,7 +120,7 @@ function _updateDestination(req, res) {
         localStatus = "DRAFT";
     }
     
-    sails.models.pickup.findOne({ id: req.params.pickupModelId }).then(function(findResult){
+    sails.models.pickup.findOne({ id: req.params.pickupModelId }).populate('boxes').then(function(findResult){
         if (findResult.status == "IDLE") {
             sails.models.pickup.update(
                 { id: req.params.pickupModelId },
@@ -170,10 +131,14 @@ function _updateDestination(req, res) {
                     status: localStatus
                 }
             ).then(function(result){
-                    return res.json(result);
+                findResult.destinationLatitude = destLat;
+                findResult.destinationLongitude = destLong;
+                findResult.destinationAddress = destAdd;
+                findResult.status = localStatus;
+                return res.json(findResult);
             });
         } else {
-            res.serverError('Cannot update destination of Pickup. Status not IDLE');
+            res.send('Cannot update destination of Pickup. Status not IDLE');
         }
         
     });       
@@ -184,26 +149,24 @@ function _addBoxToPickup(req, res) {
     var pickupIdFromReq = req.params.pickupModelId;
     var boxIdFromReq = req.params.boxId;
     
-    sails.models.pickup.findOne({id: pickupIdFromReq}).then(function(findResult){
+    sails.models.pickup.findOne({id: pickupIdFromReq}).populate('boxes').then(function(findResult){
         if (findResult.status == "DRAFT" || findResult.status == "READY") {
             sails.models.box.update({boxId: boxIdFromReq, pickupOrder: null}, {pickupOrder: pickupIdFromReq}).then(function(updated){
                 if (updated.length > 0) {
-                    var pboxUpdatedIds = findResult.pboxId;
-                    if (pboxUpdatedIds[0] == "NONE") {
-                        pboxUpdatedIds[0] = boxIdFromReq;
-                    } else {
-                        pboxUpdatedIds.push(boxIdFromReq);
-                    }
-                    sails.models.pickup.update({id: pickupIdFromReq}, {status: "READY", pboxId: pboxUpdatedIds}).then(function(result){
-                        //do nothing
+                    sails.models.pickup.update({id: pickupIdFromReq}, {status: "READY"}).then(function(result){
+                        console.log('Box ' + boxIdFromReq + ' added to Pickup ' + pickupIdFromReq);
+                        findResult.status = "READY";
+                        findResult.boxes.push(updated[0]);
+                        return res.json(findResult);
                     });
-                    return res.json(updated);
                 } else {
-                    return res.json();
+                    console.log('Cannot add Box ' + boxIdFromReq + ' to Pickup ' + pickupIdFromReq);
+                    return res.send('Cannot add Box ' + boxIdFromReq + ' to Pickup ' + pickupIdFromReq);
                 }
             });
         } else {
-            res.serverError('Invalid opperation. Cannot add Box to a Pickup which is not DRAFT or READY');
+            console.log('Invalid opperation. Cannot add Box ' + boxIdFromReq + ' to Pickup ' + pickupIdFromReq + ' which is not DRAFT or READY');
+            return res.send('Invalid opperation. Cannot add Box to a Pickup which is not DRAFT or READY');
         }
     });
 }

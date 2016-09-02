@@ -11,7 +11,7 @@
 #include <Wire.h>
 #include <ADXL345.h>
 
-#define WIFI_AP "cdb guest"
+#define WIFI_AP "cbd_guest"
 #define WIFI_PASSWORD "kodbihajnd"
 #define WIFI_AUTH LWIFI_WPA  // choose from LWIFI_OPEN, LWIFI_WPA, or LWIFI_WEP according to your WiFi AP configuration
 #define LS_PEAK_VALUE   540

@@ -21,7 +21,7 @@
 #define LIGHTSNSR       A0
 #define BTN_PIN         3
 #define ACCEL_THRESHOLD 10
-#define GPS_THRESHOLD   0.000200
+#define GPS_THRESHOLD   0.000000
 
 /*
  * ACCEL_MODE stands for ACCELEROMETER MODE. 0 = raw acceleration data, 1 = color
@@ -324,6 +324,9 @@ void PBox__GPS() {
       oldLatitude = latitude;
       oldLongitude = longitude;
     }
+  } else {
+    oldLatitude = 0.0;
+    oldLongitude = 0.0;
   }
 }
 

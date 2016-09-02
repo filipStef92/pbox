@@ -1,0 +1,12 @@
+{
+    "jscodehints.detectedExclusions": [
+        "/Users/dani/Downloads/ionic/pbox_sidemenu/www/js/controllers.js",
+        "Users/dani/Downloads/ionic/pbox_sidemenu/platforms/ios/build/emulator/pbox_sidemenu.app/www/lib/jquery/src/var/documentElement",
+        "/Users/dani/Downloads/ionic/pbox_sidemenu/www/js/services.js",
+        "/Users/dani/Downloads/ionic/pbox_sidemenu/platforms/ios/build/emulator/pbox_sidemenu.app/www/lib/jquery/src/css/var/rmargin.js",
+        "/Users/dani/Downloads/ionic/pbox_sidemenu/platforms/ios/build/emulator/pbox_sidemenu.app/www/lib/jquery/src/css/support.js",
+        "/Users/dani/Downloads/ionic/pbox_sidemenu/platforms/ios/build/emulator/pbox_sidemenu.app/www/lib/jquery/src/css/var/cssExpand.js",
+        "Users/dani/Downloads/ionic/pbox_sidemenu/platforms/ios/build/emulator/pbox_sidemenu.app/www/lib/jquery/src/css/var/isHiddenWithinTree",
+        "/Users/dani/Downloads/ionic/pbox_sidemenu/platforms/ios/build/emulator/pbox_sidemenu.app/www/lib/jquery/src/css/var/getStyles.js"
+    ]
+}

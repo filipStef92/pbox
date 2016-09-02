@@ -1,0 +1,44 @@
+<ion-view view-title="Pickup">
+    <ion-content>
+        <div class="list card">
+            <div class="item item-text-wrap">
+                <h1>{{pickup.id}}</h1>
+                <h3>Pickup Address: {{pickup.pickupAddress}}</h3>
+            </div>
+            <div class="item item-text-wrap">
+                <h3>Destination Address: {{pickup.destinationAddress}}</h3>
+            </div>
+            <div class="item item-body">
+                <p>Needs box of size: <b>{{pickup.packageSize}}</b></p>
+                <p>Status: <b>{{pickup.status}}</b></p>
+            </div>
+        </div>
+
+        <div ng-if="userType == 'Hero' || userType == 'Admin'">
+            <ion-list can-swipe="true">
+                <button class="button button-clear button-block button-positive" ng-click="openAttachNewBoxModal()">
+                    ATTACH NEW BOX
+                </button>
+                <ion-item gesture-type="swipeRight" on-swipe-right="swipeRight()" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap" ng-repeat="box in pickup.boxes" href="#/app/boxes/{{box.boxId}}">
+                    <div style="position: absolute;   top: 50%; transform: translateY(-50%);">
+                        {{box.boxId}}
+                    </div>
+                    <ion-option-button class="button-assertive" ng-click="removeBoxFromPickup(box.boxId)" side="right">
+                        Remove
+                    </ion-option-button>
+                </ion-item>
+            </ion-list>
+        </div>
+        
+        <div ng-if="userType == 'Mortal'">
+            <ion-list>
+                <ion-item class="item-remove-animate item-avatar" type="item-text-wrap" ng-repeat="box in pickup.boxes" href="#/app/boxes/{{box.boxId}}">
+                    <div style="position: absolute;   top: 50%; transform: translateY(-50%);">
+                        {{box.boxId}}
+                    </div>
+                </ion-item>
+            </ion-list>
+        </div>
+            
+    </ion-content>
+</ion-view>

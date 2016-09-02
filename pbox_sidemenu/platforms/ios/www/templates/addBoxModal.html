@@ -1,0 +1,47 @@
+<ion-modal-view>
+   <ion-header-bar>
+       <button class = "button icon icon-left ion-ios-close-outline"
+         ng-click = "closeAddBoxModal()">
+       </button>
+      <h1 class = "title">ADD BOX</h1>
+   </ion-header-bar>
+	
+   <ion-content>
+       <div class="list">
+           <label class="item item-input item-stacked-label">
+           <span class="input-label">Box ID</span>
+           <input type="text" placeholder="The ID of the PBox" ng-model="boxParam.boxIdParam">
+           </label>
+           
+           <label class="item item-input item-stacked-label">
+           <span class="input-label">Temperature Asset ID</span>
+           <input type="text" placeholder="The Temperature Asset ID" ng-model="boxParam.tempAssetId">
+           </label>
+           
+           <label class="item item-input item-stacked-label">
+           <span class="input-label">Humidity Asset ID</span>
+           <input type="text" placeholder="The Humidity Asset ID" ng-model="boxParam.humidAssetId">
+           </label>
+           
+           <label class="item item-input item-stacked-label">
+           <span class="input-label">Light Asset ID</span>
+           <input type="text" placeholder="The Light Asset ID" ng-model="boxParam.lightAssetId">
+           </label>
+           
+           <label class="item item-input item-stacked-label">
+           <span class="input-label">GPS Asset ID</span>
+           <input type="text" placeholder="The GPS Asset ID" ng-model="boxParam.gpsAssetId">
+           </label>
+           
+           <label class="item item-input item-stacked-label">
+           <span class="input-label">Accelerometer Asset ID</span>
+           <input type="text" placeholder="The Accelerometer Asset ID" ng-model="boxParam.accelAssetId">
+           </label>
+       </div>
+       
+       <button class="button button-outline button-full button-balanced" ng-click="addBox(boxParam)">
+          ADD
+       </button>
+       
+   </ion-content>
+</ion-modal-view>

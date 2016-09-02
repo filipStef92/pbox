@@ -1,0 +1,21 @@
+<ion-view view-title="Boxes">
+    <ion-content>
+        <ion-refresher
+            pulling-text="Pull to refresh..." on-refresh="refreshBoxes()">
+        </ion-refresher>
+        <ion-list>
+            <button class="button button-outline button-full button-balanced" ng-click="openAddBoxModal()">
+                ADD BOX
+            </button>
+            <ion-item gesture-type="swipeRight" on-swipe-right="swipeRight()" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap" ng-repeat="box in boxes"
+                href="#/app/boxes/{{box.boxId}}">
+                <div style="position: absolute;   top: 50%; transform: translateY(-50%);">
+                    {{box.boxId}}
+                </div>
+                <ion-option-button class="button-assertive" ng-click="removeItem(box.boxId)" side="right">
+                    Delete
+                </ion-option-button>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

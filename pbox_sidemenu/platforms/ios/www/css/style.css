@@ -1,0 +1,21 @@
+/* Empty. Add your own CSS if you like */
+.pac-container {
+    pointer-events: all !important;
+}
+
+input[type="radio"] {
+    opacity:0.0;
+    z-index:100;
+}
+
+input[type="radio"]:checked + label {
+    background: #f7f7f7;
+}
+
+label {
+    display: block;
+    padding: 20px;
+    border: 1px solid #CCC; 
+    cursor:pointer;
+    z-index: 90;
+}

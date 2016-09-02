@@ -1,0 +1,13 @@
+
+    {
+      "name": "pbox_sidemenu",
+      "app_id": "",
+      "gulpStartupTasks": [
+        "sass",
+        "watch"
+      ],
+      "watchPatterns": [
+        "www/**/*",
+        "!www/lib/**/*"
+      ]
+    }

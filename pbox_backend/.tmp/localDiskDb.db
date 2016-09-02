@@ -1,0 +1,97 @@
+{
+  "data": {
+    "box": [],
+    "pickup": []
+  },
+  "schema": {
+    "box": {
+      "boxId": {
+        "type": "string"
+      },
+      "buttonAssetId": {
+        "type": "string"
+      },
+      "gpsAssetId": {
+        "type": "string"
+      },
+      "temperatureAssetId": {
+        "type": "string"
+      },
+      "humidityAssetId": {
+        "type": "string"
+      },
+      "lightAssetId": {
+        "type": "string"
+      },
+      "accelerometerAssetId": {
+        "type": "string"
+      },
+      "isBeingDelivered": {
+        "type": "boolean"
+      },
+      "pickupOrder": {
+        "type": "integer",
+        "model": "pickup",
+        "foreignKey": true,
+        "alias": "pickupOrder"
+      },
+      "id": {
+        "type": "integer",
+        "autoIncrement": true,
+        "primaryKey": true,
+        "unique": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "pickup": {
+      "pickupLatitude": {
+        "type": "float"
+      },
+      "pickupLongitude": {
+        "type": "float"
+      },
+      "pickupAddress": {
+        "type": "string"
+      },
+      "destinationLatitude": {
+        "type": "float"
+      },
+      "destinationLongitude": {
+        "type": "float"
+      },
+      "destinationAddress": {
+        "type": "string"
+      },
+      "packageSize": {
+        "type": "string"
+      },
+      "pboxId": {
+        "type": "array"
+      },
+      "status": {
+        "type": "string"
+      },
+      "id": {
+        "type": "integer",
+        "autoIncrement": true,
+        "primaryKey": true,
+        "unique": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    }
+  },
+  "counters": {
+    "box": {},
+    "pickup": {}
+  }
+}

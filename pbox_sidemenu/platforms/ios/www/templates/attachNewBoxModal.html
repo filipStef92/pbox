@@ -1,0 +1,19 @@
+<ion-modal-view>
+    <ion-header-bar>
+            <button class = "button icon icon-left ion-ios-close-outline"
+                ng-click = "closeAttachNewBoxModal()">
+            </button>
+        <h1 class = "title">ATTACH NEW BOX</h1>
+    </ion-header-bar>
+	
+    <ion-content>
+        <label class="item item-input item-stacked-label">
+           <span class="input-label">Box ID</span>
+           <input type="text" placeholder="The ID of the PBox to attach" ng-model="boxIdParam">
+        </label>
+        <button class="button button-outline button-full button-positive" ng-click="attachBox(boxIdParam)">
+            ATTACH
+        </button>
+    </ion-content>
+
+</ion-modal-view>

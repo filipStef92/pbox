@@ -1,0 +1,58 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <button class = "button icon icon-left ion-ios-close-outline"
+            ng-click = "closeAddPickupModal()">
+        </button>
+        <h1 class = "title">ADD PICKUP</h1>
+   </ion-header-bar>
+	
+    <ion-content>
+        
+        <div class="row" align="center">
+            <div class="col col-90 col-left">
+                <label class="item item-input item-stacked-label" align="left">
+                <span class="input-label">Pickup Address</span>
+                <input type="text" id="pickupAddress" g-places-autocomplete force-selection="true" placeholder="Pickup starting location" ng-model="pickupData.pickupAddress" ng-change="addressLabelChanged('pickupAddress')">
+                </label>
+            </div>
+
+            <div class="col col-10 col-center">
+                <button class="button button-small button-light icon ion-ios-location" ng-click="putCurrentLocation('InPickup')">
+                </button>
+            </div>
+        </div>
+            
+        <div class="row" align="center">
+            <div class="col col-90 col-left">
+                <label class="item item-input item-stacked-label" align="left">
+                <span class="input-label">Destination Address</span>
+                <input type="search" id="pickupDestination" g-places-autocomplete force-selection="true" placeholder="Pickup destination location" ng-model="pickupData.pickupDestination" ng-change="addressLabelChanged('pickupDestination')">
+                </label>
+            </div>
+            
+            <div class="col col-10 col-center">
+                <button class="button button-small button-light icon ion-ios-location" ng-click="putCurrentLocation('InDestination')">
+                </button>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col col-33 col-center">
+                <input id="boxOptionS" type="radio" name="field" value="Small" ng-model="pickupData.boxSize" ng-value="'Small'">
+                <label for="boxOptionS">Small</label>
+            </div>
+            <div class="col col-33 col-center">
+                <input id="boxOptionM" type="radio" name="field" value="Medium" ng-model="pickupData.boxSize" ng-value="'Medium'">
+                <label for="boxOptionM">Medium</label>
+            </div>
+            <div class="col col-33 col-center">
+                <input id="boxOptionL" type="radio" name="field" value="Large" ng-model="pickupData.boxSize" ng-value="'Large'">
+                <label for="boxOptionL">Large</label>
+            </div>
+        </div>
+        
+        <button class="button button-outline button-full button-balanced" ng-click="addPickup()">
+          ADD
+        </button>
+    </ion-content>
+</ion-modal-view>
